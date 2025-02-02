@@ -175,15 +175,9 @@ async function main() {
 		errorLog.textContent = reason;
 	});
 
-	// はじめは mls-mpm
 	let paramsIdx = 1
-	const initDistance = mlsmpmInitDistances[paramsIdx]
 	let initBoxSize = mlsmpmInitBoxSizes[paramsIdx]
 	let realBoxSize = [...initBoxSize];
-	let numParticles = mlsmpmNumParticleParams[paramsIdx];
-	mlsmpmSimulator.reset(mlsmpmInitBoxSizes[paramsIdx], radiuses[paramsIdx])
-	camera.reset(initDistance, [initBoxSize[0] / 2, initBoxSize[1] / 2, initBoxSize[2] / 2], 
-		mlsmpmFov, mlsmpmZoomRate)
 
 	smallValue.textContent = "30,000"
 	mediumValue.textContent = "60,000"
@@ -191,13 +185,14 @@ async function main() {
 
 	let sphereRenderFl = false
 	let rotateFl = false
+	let startFl = true
 	let boxWidthRatio = 1.
 
 	console.log("simulation start")
 	async function frame() {
 		const start = performance.now();
 
-		if (numberButtonPressed) { 
+		if (numberButtonPressed || startFl) { 
 			paramsIdx = parseInt(numberButtonPressedButton)
 			initBoxSize = mlsmpmInitBoxSizes[paramsIdx]
 			mlsmpmSimulator.reset(initBoxSize, radiuses[paramsIdx])
@@ -207,6 +202,7 @@ async function main() {
 			let slider = document.getElementById("slider") as HTMLInputElement
 			slider.value = "100"
 			numberButtonPressed = false
+			startFl = false
 		}
 
 
