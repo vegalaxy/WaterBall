@@ -19,7 +19,7 @@ export class MLSMPMSimulator {
     initBoxSizeBuffer: GPUBuffer
     numParticlesBuffer: GPUBuffer
     densityBuffer: GPUBuffer
-    canvasInfoUniformBuffer: GPUBuffer
+    mouseInfoUniformBuffer: GPUBuffer
     sphereRadiusBuffer: GPUBuffer
     numParticles = 0
     gridCount = 0
@@ -50,7 +50,7 @@ export class MLSMPMSimulator {
 
     spawned: boolean
 
-    canvasInfoValues: ArrayBuffer
+    mouseInfoValues: ArrayBuffer
 
     restDensity: number
 
@@ -152,7 +152,7 @@ export class MLSMPMSimulator {
         const realBoxSizeValues = new ArrayBuffer(12);
         const initBoxSizeValues = new ArrayBuffer(12);
         const numParticlesValues = new ArrayBuffer(4);
-        this.canvasInfoValues = new ArrayBuffer(24);
+        this.mouseInfoValues = new ArrayBuffer(32);
 
         const cellBuffer = device.createBuffer({ 
             label: 'cells buffer', 
@@ -179,9 +179,9 @@ export class MLSMPMSimulator {
             size: numParticlesValues.byteLength, 
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         }) 
-        this.canvasInfoUniformBuffer = device.createBuffer({
-            label: 'canvas info buffer', 
-            size: this.canvasInfoValues.byteLength, 
+        this.mouseInfoUniformBuffer = device.createBuffer({
+            label: 'mouse info buffer', 
+            size: this.mouseInfoValues.byteLength, 
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         })
         this.sphereRadiusBuffer = device.createBuffer({
@@ -191,13 +191,14 @@ export class MLSMPMSimulator {
         })
 
         // TODO : これを一か所にまとめる
-        const canvasInfoViews = {
-            screenSize: new Float32Array(this.canvasInfoValues, 0, 2),
-            mouseCoord: new Float32Array(this.canvasInfoValues, 8, 2),
-            mouseVel: new Float32Array(this.canvasInfoValues, 16, 2),
+        const mouseInfoViews = {
+            screenSize: new Float32Array(this.mouseInfoValues, 0, 2),
+            mouseCoord: new Float32Array(this.mouseInfoValues, 8, 2),
+            mouseVel: new Float32Array(this.mouseInfoValues, 16, 2),
+            mouseRadius: new Float32Array(this.mouseInfoValues, 24, 1),
         };
-        canvasInfoViews.screenSize.set([canvas.width, canvas.height]);
-        this.device.queue.writeBuffer(this.canvasInfoUniformBuffer, 0, this.canvasInfoValues);
+        mouseInfoViews.screenSize.set([canvas.width, canvas.height]);
+        this.device.queue.writeBuffer(this.mouseInfoUniformBuffer, 0, this.mouseInfoValues);
 
         // BindGroup
         this.clearGridBindGroup = device.createBindGroup({
@@ -241,7 +242,7 @@ export class MLSMPMSimulator {
                 { binding: 2, resource: { buffer: this.initBoxSizeBuffer }},
                 { binding: 3, resource: { buffer: renderUniformBuffer }}, 
                 { binding: 4, resource: depthMapTextureView }, 
-                { binding: 5, resource: { buffer: this.canvasInfoUniformBuffer }}, 
+                { binding: 5, resource: { buffer: this.mouseInfoUniformBuffer }}, 
             ],
         })
         this.g2pBindGroup = device.createBindGroup({
@@ -318,17 +319,19 @@ export class MLSMPMSimulator {
         this.changeNumParticles(0)
     }
 
-    execute(commandEncoder: GPUCommandEncoder, mouseCoord: number[], mouseVel: number[], targetNumParticles: number) {
+    execute(commandEncoder: GPUCommandEncoder, mouseCoord: number[], mouseVel: number[], targetNumParticles: number, mouseRadius: number) {
         const computePass = commandEncoder.beginComputePass();
 
         const canvasInfoViews = {
-            screenSize: new Float32Array(this.canvasInfoValues, 0, 2),
-            mouseCoord: new Float32Array(this.canvasInfoValues, 8, 2),
-            mouseVel: new Float32Array(this.canvasInfoValues, 16, 2),
+            screenSize: new Float32Array(this.mouseInfoValues, 0, 2),
+            mouseCoord: new Float32Array(this.mouseInfoValues, 8, 2),
+            mouseVel: new Float32Array(this.mouseInfoValues, 16, 2),
+            mouseRadius : new Float32Array(this.mouseInfoValues, 24, 2),
         };
         canvasInfoViews.mouseCoord.set([mouseCoord[0], mouseCoord[1]])
         canvasInfoViews.mouseVel.set([mouseVel[0], mouseVel[1]])
-        this.device.queue.writeBuffer(this.canvasInfoUniformBuffer, 0, this.canvasInfoValues);
+        canvasInfoViews.mouseRadius.set([mouseRadius])
+        this.device.queue.writeBuffer(this.mouseInfoUniformBuffer, 0, this.mouseInfoValues);
 
         if (this.frameCount % 2 == 0 && this.numParticles < targetNumParticles) { // TODO : dt に依存しないようにする
             console.log("spawn");

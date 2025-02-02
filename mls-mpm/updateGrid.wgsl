@@ -12,10 +12,11 @@ struct RenderUniforms {
     view_matrix: mat4x4f, 
     inv_view_matrix: mat4x4f, 
 }
-struct CanvasInfo {
+struct MouseInfo {
     screenSize: vec2f, 
     mouseCoord : vec2f, 
     mouseVel : vec2f, 
+    mouseRadius: f32, 
 }
 
 override fixed_point_multiplier: f32; 
@@ -26,7 +27,7 @@ override dt: f32;
 @group(0) @binding(2) var<uniform> init_box_size: vec3f;
 @group(0) @binding(3) var<uniform> uniforms: RenderUniforms;
 @group(0) @binding(4) var depthTexture: texture_2d<f32>;
-@group(0) @binding(5) var<uniform> mouseInfo: CanvasInfo; 
+@group(0) @binding(5) var<uniform> mouseInfo: MouseInfo; 
 
 fn encodeFixedPoint(floating_point: f32) -> i32 {
 	return i32(floating_point * fixed_point_multiplier);
@@ -84,7 +85,7 @@ fn updateGrid(@builtin(global_invocation_id) id: vec3<u32>) {
         }
 
         let dt = dt;
-        let r = 5.;
+        let r = mouseInfo.mouseRadius;
 
         if (cells[id.x].mass > 0) { // 0 との比較は普通にしてよい
             var float_v: vec3f = vec3f(

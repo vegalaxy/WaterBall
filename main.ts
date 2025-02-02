@@ -150,6 +150,7 @@ async function main() {
 	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [72, 72, 72]]
 	let mlsmpmInitDistances = [60, 70, 90]
 	let radiuses = [15, 20, 25]
+	let mouseRadiuses = [5, 6, 8]
 	let stretchStrength = [2.5, 2.0, 1.5]
 
 	const canvasElement = document.getElementById("fluidCanvas") as HTMLCanvasElement;
@@ -234,7 +235,7 @@ async function main() {
 		// 計算のためのパス
 		mlsmpmSimulator.execute(commandEncoder, 
 				[camera.currentHoverX / canvas.clientWidth, camera.currentHoverY / canvas.clientHeight], 
-				camera.calcMouseVelocity(), mlsmpmNumParticleParams[paramsIdx])
+				camera.calcMouseVelocity(), mlsmpmNumParticleParams[paramsIdx], mouseRadiuses[paramsIdx])
 		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 
 		device.queue.submit([commandEncoder.finish()])
