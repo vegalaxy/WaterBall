@@ -147,7 +147,7 @@ async function main() {
 
 
 	let mlsmpmNumParticleParams = [30000, 60000, 100000]
-	let mlsmpmInitBoxSizes = [[54, 54, 54], [60, 60, 60], [72, 72, 72]]
+	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [72, 72, 72]]
 	let mlsmpmInitDistances = [60, 70, 90]
 	let radiuses = [15, 20, 25]
 	let stretchStrength = [2.5, 2.0, 1.5]
