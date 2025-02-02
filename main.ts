@@ -125,7 +125,7 @@ async function main() {
 	console.log("buffer allocating done")
 
 	let mlsmpmNumParticleParams = [30000, 60000, 100000]
-	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [72, 72, 72]]
+	let mlsmpmInitBoxSizes = [[54, 54, 54], [60, 60, 60], [72, 72, 72]]
 	let mlsmpmInitDistances = [60, 70, 90]
 	let radiuses = [15, 20, 25]
 	let stretchStrength = [2.5, 2.0, 1.5]
@@ -190,6 +190,7 @@ async function main() {
 	largeValue.textContent = "100,000"
 
 	let sphereRenderFl = false
+	let rotateFl = false
 	let boxWidthRatio = 1.
 
 	console.log("simulation start")
@@ -208,10 +209,12 @@ async function main() {
 			numberButtonPressed = false
 		}
 
-		// ボックスサイズの変更
+
 		const slider = document.getElementById("slider") as HTMLInputElement
 		const particle = document.getElementById("particle") as HTMLInputElement
+		const rotate = document.getElementById("autorotate") as HTMLInputElement
 		sphereRenderFl = particle.checked
+		rotateFl = rotate.checked
 		let curBoxWidthRatio = parseInt(slider.value) / 200 + 0.5
 		const minClosingSpeed = -0.01
 		const maxOpeningSpeed = 0.04
@@ -235,7 +238,9 @@ async function main() {
 		device.queue.submit([commandEncoder.finish()])
 
 		camera.setNewPrevMouseCoord();
-		camera.stepAngle();
+		if (rotateFl) {
+			camera.stepAngle();
+		}
 
 		const end = performance.now();
 
