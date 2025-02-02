@@ -48,8 +48,29 @@ async function init() {
 	return { canvas, device, presentationFormat, context }
 }
 
+function sleep(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+  
+
 async function main() {
 	const { canvas, device, presentationFormat, context } = await init();
+
+	// ボタン押下の監視
+	let numberButtonForm = document.getElementById('number-button') as HTMLFormElement;
+	let numberButtonPressed = false;
+	let numberButtonPressedButton = "1"
+	numberButtonForm.addEventListener('change', function(event) {
+		const target = event.target as HTMLInputElement
+		if (target?.name === 'options') {
+			numberButtonPressed = true
+			numberButtonPressedButton = target.value
+		}
+	}); 
+	const smallValue = document.getElementById("small-value") as HTMLSpanElement;
+	const mediumValue = document.getElementById("medium-value") as HTMLSpanElement;
+	const largeValue = document.getElementById("large-value") as HTMLSpanElement;
+	
 
 	console.log("initialization done")
 
@@ -124,6 +145,7 @@ async function main() {
 
 	console.log("buffer allocating done")
 
+
 	let mlsmpmNumParticleParams = [30000, 60000, 100000]
 	let mlsmpmInitBoxSizes = [[54, 54, 54], [60, 60, 60], [72, 72, 72]]
 	let mlsmpmInitDistances = [60, 70, 90]
@@ -150,22 +172,6 @@ async function main() {
 	console.log("simulator initialization done")
 
 	const camera = new Camera(canvasElement);
-
-	// ボタン押下の監視
-	let numberButtonForm = document.getElementById('number-button') as HTMLFormElement;
-	let numberButtonPressed = false;
-	let numberButtonPressedButton = "1"
-	numberButtonForm.addEventListener('change', function(event) {
-		const target = event.target as HTMLInputElement
-		if (target?.name === 'options') {
-			numberButtonPressed = true
-			numberButtonPressedButton = target.value
-		}
-	}); 
-	const smallValue = document.getElementById("small-value") as HTMLSpanElement;
-	const mediumValue = document.getElementById("medium-value") as HTMLSpanElement;
-	const largeValue = document.getElementById("large-value") as HTMLSpanElement;
-	const veryLargeValue = document.getElementById("very-large-value") as HTMLSpanElement;
 
 	// デバイスロストの監視
 	let errorLog = document.getElementById('error-reason') as HTMLSpanElement;
