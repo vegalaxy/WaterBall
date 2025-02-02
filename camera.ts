@@ -145,7 +145,7 @@ export class Camera {
     }
 
     stepAngle() {
-        this.currentXtheta += 0.015
+        this.currentXtheta += 0.012
         this.recalculateView()
     }
 }

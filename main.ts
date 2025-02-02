@@ -125,9 +125,10 @@ async function main() {
 	console.log("buffer allocating done")
 
 	let mlsmpmNumParticleParams = [30000, 60000, 100000]
-	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [68, 68, 68]]
+	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [72, 72, 72]]
 	let mlsmpmInitDistances = [60, 70, 90]
 	let radiuses = [15, 20, 25]
+	let stretchStrength = [2.5, 2.0, 1.5]
 
 	const canvasElement = document.getElementById("fluidCanvas") as HTMLCanvasElement;
 	// シミュレーション，カメラの初期化
@@ -229,7 +230,7 @@ async function main() {
 		mlsmpmSimulator.execute(commandEncoder, 
 				[camera.currentHoverX / canvas.clientWidth, camera.currentHoverY / canvas.clientHeight], 
 				camera.calcMouseVelocity(), mlsmpmNumParticleParams[paramsIdx])
-		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl)
+		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 
 		device.queue.submit([commandEncoder.finish()])
 

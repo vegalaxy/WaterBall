@@ -24,9 +24,9 @@ struct PosVel {
 
 @group(0) @binding(0) var<storage> particles: array<PosVel>;
 @group(0) @binding(1) var<uniform> uniforms: RenderUniforms;
+@group(0) @binding(2) var<uniform> stretchStrength: f32;
 
 override restDensity: f32;
-override stretchStrength: f32;
 override densitySizeScale: f32;
 
 // assuming center is origin

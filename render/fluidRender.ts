@@ -29,6 +29,7 @@ export class FluidRenderer {
     fluidBindGroup: GPUBindGroup
     sphereBindGroup: GPUBindGroup
 
+    stretchStrengthBuffer: GPUBuffer
 
     device: GPUDevice
     constructor(
@@ -54,7 +55,6 @@ export class FluidRenderer {
         }
         const renderEffectConstants = {
             'restDensity' : restDensity, 
-            'stretchStrength' : 2.0, 
             'densitySizeScale' : 4.0, 
         }
         const sampler = device.createSampler({
@@ -230,12 +230,12 @@ export class FluidRenderer {
         this.depthTestTextureView = depthTestTexture.createView()
 
         // buffer
-        const filterXUniformsValues = new ArrayBuffer(8);
-        const filterYUniformsValues = new ArrayBuffer(8);
-        const filterXUniformsViews = { blur_dir: new Float32Array(filterXUniformsValues) };
-        const filterYUniformsViews = { blur_dir: new Float32Array(filterYUniformsValues) };
-        filterXUniformsViews.blur_dir.set([1.0, 0.0]);
-        filterYUniformsViews.blur_dir.set([0.0, 1.0]);
+        const filterXUniformsValues = new ArrayBuffer(8)
+        const filterYUniformsValues = new ArrayBuffer(8)
+        const filterXUniformsViews = new Float32Array(filterXUniformsValues)
+        const filterYUniformsViews = new Float32Array(filterYUniformsValues) 
+        filterXUniformsViews.set([1.0, 0.0])
+        filterYUniformsViews.set([0.0, 1.0])
         const filterXUniformBuffer = device.createBuffer({
             label: 'filter uniform buffer', 
             size: filterXUniformsValues.byteLength, 
@@ -244,6 +244,11 @@ export class FluidRenderer {
         const filterYUniformBuffer = device.createBuffer({
             label: 'filter uniform buffer', 
             size: filterYUniformsValues.byteLength, 
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+        })
+        this.stretchStrengthBuffer = device.createBuffer({
+            label: 'stretch strength buffer', 
+            size: 4, 
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
         })
         device.queue.writeBuffer(filterXUniformBuffer, 0, filterXUniformsValues);
@@ -256,6 +261,7 @@ export class FluidRenderer {
             entries: [
               { binding: 0, resource: { buffer: posvelBuffer }},
               { binding: 1, resource: { buffer: renderUniformBuffer }},
+              { binding: 2, resource: { buffer: this.stretchStrengthBuffer }}
             ]
         })
         this.depthFilterBindGroups = []
@@ -284,7 +290,8 @@ export class FluidRenderer {
             layout: this.thicknessMapPipeline.getBindGroupLayout(0),
             entries: [
                 { binding: 0, resource: { buffer: posvelBuffer }},
-                { binding: 1, resource: { buffer: renderUniformBuffer }},
+                { binding: 1, resource: { buffer: renderUniformBuffer }}, 
+                { binding: 2, resource: { buffer: this.stretchStrengthBuffer }}
             ],
         })
         this.thicknessFilterBindGroups = []
@@ -327,14 +334,20 @@ export class FluidRenderer {
             entries: [
                 { binding: 0, resource: { buffer: posvelBuffer }},
                 { binding: 1, resource: { buffer: renderUniformBuffer }},
+                { binding: 2, resource: { buffer: this.stretchStrengthBuffer }}
             ]
         })
     }
 
 
     execute(context: GPUCanvasContext, commandEncoder: GPUCommandEncoder, 
-        numParticles: number, sphereRenderFl: boolean) 
+        numParticles: number, sphereRenderFl: boolean, stretchStrength: number) 
     {
+        const stretchStrengthValues = new ArrayBuffer(4)
+        const stretchStrengthViews = new Float32Array(stretchStrengthValues)
+        stretchStrengthViews.set([stretchStrength])
+        this.device.queue.writeBuffer(this.stretchStrengthBuffer, 0, stretchStrengthViews)
+
         const depthMapPassDescriptor: GPURenderPassDescriptor = {
             colorAttachments: [
                 {
