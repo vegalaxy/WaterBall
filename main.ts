@@ -1,4 +1,3 @@
-import { PrefixSumKernel } from 'webgpu-radix-sort';
 import { mat4 } from 'wgpu-matrix'
 
 import { Camera } from './camera'
