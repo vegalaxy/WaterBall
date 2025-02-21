@@ -1,4 +1,4 @@
-# waterball
+# WaterBall
 Real-time fluid simulation on a sphere🌏 implemented in WebGPU. 
 
 Works on your browsers which support WebGPU (Chrome, Edge etc. Safari is also supported when WebGPU feature flag is enabled).
