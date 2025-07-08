@@ -52,8 +52,13 @@ export class HandTracker {
     }
 
     private onResults(results: Results) {
-        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            // Get the first hand's landmarks
+			// Get the canvas element to use its dimensions
+			const canvas = document.getElementById('fluidCanvas') as HTMLCanvasElement;
+			const canvasRect = canvas.getBoundingClientRect();
+			
+			// Convert to canvas-relative coordinates
+			const screenX = (1 - indexFingerTip.x) * canvasRect.width + canvasRect.left;
+			const screenY = indexFingerTip.y * canvasRect.height + canvasRect.top;
             const landmarks = results.multiHandLandmarks[0];
             
             // Index finger tip is landmark 8
