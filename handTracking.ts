@@ -64,13 +64,13 @@ export class HandTracker {
             
             // Convert normalized coordinates to screen coordinates
             // Note: MediaPipe coordinates are normalized (0-1) and mirrored
-            const screenX = (1 - indexFingerTip.x) * canvasRect.width + canvasRect.left;
-            const screenY = indexFingerTip.y * canvasRect.height + canvasRect.top;
+            const handScreenX = (1 - indexFingerTip.x) * canvasRect.width + canvasRect.left;
+            const handScreenY = indexFingerTip.y * canvasRect.height + canvasRect.top;
 
             this.previousPosition = { ...this.currentPosition };
             this.currentPosition = {
-                x: screenX,
-                y: screenY,
+                x: handScreenX,
+                y: handScreenY,
                 isDetected: true
             };
         } else {
