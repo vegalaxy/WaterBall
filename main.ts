@@ -6,8 +6,6 @@ import { renderUniformsViews, renderUniformsValues, numParticlesMax } from './co
 import { FluidRenderer } from './render/fluidRender'
 import { HandTracker, HandPosition } from './handTracking'
 import { HandIndicator } from './handIndicator'
-import { VoiceBot } from './voiceBot'
-import { VoiceControls } from './voiceControls'
 
 /// <reference types="@webgpu/types" />
 
@@ -197,32 +195,6 @@ async function main() {
 		console.error('Failed to initialize hand tracking:', error);
 	}
 
-	// Voice bot setup
-	const voiceControls = new VoiceControls();
-	const voiceBot = new VoiceBot((status: string) => {
-		const botStatus = voiceBot.getStatus();
-		voiceControls.updateStatus(status, botStatus.isConnected, botStatus.isListening);
-	});
-
-	// Voice control event handlers
-	voiceControls.onStartClick(async () => {
-		console.log('Starting voice conversation...');
-		await voiceBot.startConversation();
-	});
-
-	voiceControls.onEndClick(async () => {
-		console.log('Ending voice conversation...');
-		await voiceBot.endConversation();
-	});
-
-	// Initialize voice bot
-	try {
-		await voiceBot.initialize();
-		console.log('Voice bot initialized successfully');
-	} catch (error) {
-		console.error('Failed to initialize voice bot:', error);
-	}
-
 	console.log("simulator initialization done")
 
 	const camera = new Camera(canvasElement);
@@ -334,13 +306,6 @@ async function main() {
 		requestAnimationFrame(frame)
 	} 
 	requestAnimationFrame(frame)
-
-	// Cleanup on page unload
-	window.addEventListener('beforeunload', async () => {
-		await voiceBot.disconnect();
-		voiceControls.destroy();
-		handIndicator.destroy();
-	});
 }
 
 main()
