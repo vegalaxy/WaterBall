@@ -1,4 +1,4 @@
-import ElevenLabs from '@11labs/client';
+import * as ElevenLabs from '@11labs/client';
 
 export class VoiceBot {
     private conversation: any = null;
