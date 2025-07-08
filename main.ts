@@ -263,40 +263,24 @@ async function main() {
 		let interactionVelocity: number[];
 		
 		if (currentHandPosition.isDetected) {
-			// Convert hand screen coordinates to canvas-relative coordinates
+			// Convert hand screen coordinates to canvas coordinates
 			const canvasRect = canvas.getBoundingClientRect();
+			const handCanvasX = currentHandPosition.x - canvasRect.left;
+			const handCanvasY = currentHandPosition.y - canvasRect.top;
+			const prevHandCanvasX = previousHandPosition.x - canvasRect.left;
+			const prevHandCanvasY = previousHandPosition.y - canvasRect.top;
 			
-			// Calculate relative position within the canvas bounds
-			const relativeX = (currentHandPosition.x - canvasRect.left) / canvasRect.width;
-			const relativeY = (currentHandPosition.y - canvasRect.top) / canvasRect.height;
+			// Use normalized coordinates for interaction
+			interactionCoord = [
+				handCanvasX / canvas.clientWidth,
+				handCanvasY / canvas.clientHeight
+			];
 			
-			// Clamp to canvas bounds
-			const clampedX = Math.max(0, Math.min(1, relativeX));
-			const clampedY = Math.max(0, Math.min(1, relativeY));
-			
-			// Normalize to canvas dimensions (0-1 range)
-			interactionCoord = [clampedX, clampedY];
-			
-			// Calculate hand velocity
-			const handVel = handTracker.getVelocity();
-			
-			// Scale velocity to match canvas dimensions and expected range
-			const velX = (handVel.x / canvasRect.width) * (canvasRect.width / canvasRect.height);
-			const velY = -(handVel.y / canvasRect.height);
-			
-			interactionVelocity = [velX, velY, 0, 0];
-			
-			// Debug logging
-			if (Math.abs(handVel.x) > 2 || Math.abs(handVel.y) > 2) {
-				console.log('Hand interaction:', {
-					screenPos: [currentHandPosition.x, currentHandPosition.y],
-					canvasRect: canvasRect,
-					relative: [relativeX, relativeY],
-					coord: interactionCoord,
-					velocity: interactionVelocity,
-					rawVel: handVel
-				});
-			}
+			// Use camera's hand velocity calculation method for consistency
+			interactionVelocity = camera.calcHandVelocity(
+				handCanvasX, handCanvasY,
+				prevHandCanvasX, prevHandCanvasY
+			);
 		} else {
 			// Fall back to mouse interaction
 			interactionCoord = [

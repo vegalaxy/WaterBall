@@ -117,11 +117,18 @@ export class Camera {
         let mouseVelocityY = mousePlaneY - prevMousePlaneY
         let mouseViewVelocity = [mouseVelocityX, mouseVelocityY, 0, 0]
 
-        let velX = (this.currentHoverX - this.prevHoverX) / this.canvas.width * (this.canvas.width / this.canvas.height);
-        let velY = -(this.currentHoverY - this.prevHoverY) / this.canvas.height;
-
         // ワールド座標に直すのはコンピュートシェーダーで
         return mouseViewVelocity
+    }
+
+    calcHandVelocity(currentX: number, currentY: number, prevX: number, prevY: number) {
+        let [currentPlaneX, currentPlaneY] = this.calcPlaneCoord(currentX, currentY)
+        let [prevPlaneX, prevPlaneY] = this.calcPlaneCoord(prevX, prevY)
+
+        let velocityX = currentPlaneX - prevPlaneX
+        let velocityY = currentPlaneY - prevPlaneY
+        
+        return [velocityX, velocityY, 0, 0]
     }
 
     calcPlaneCoord(x: number, y: number) {
