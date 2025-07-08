@@ -4,6 +4,8 @@ import { Camera } from './camera'
 import { mlsmpmParticleStructSize, MLSMPMSimulator } from './mls-mpm/mls-mpm'
 import { renderUniformsViews, renderUniformsValues, numParticlesMax } from './common'
 import { FluidRenderer } from './render/fluidRender'
+import { HandTracker, HandPosition } from './handTracking'
+import { HandIndicator } from './handIndicator'
 
 /// <reference types="@webgpu/types" />
 
@@ -169,6 +171,30 @@ async function main() {
 	const mlsmpmRenderer = new FluidRenderer(device, canvas, presentationFormat, mlsmpmRadius, mlsmpmFov, posvelBuffer, renderUniformBuffer, 
 		cubemapTextureView, depthMapTextureView, mlsmpmSimulator.restDensity)
 
+	// Hand tracking setup
+	const handIndicator = new HandIndicator();
+	let currentHandPosition: HandPosition = { x: 0, y: 0, isDetected: false };
+	let previousHandPosition: HandPosition = { x: 0, y: 0, isDetected: false };
+	
+	const handTracker = new HandTracker((position: HandPosition) => {
+		previousHandPosition = { ...currentHandPosition };
+		currentHandPosition = position;
+		handIndicator.updatePosition(position.x, position.y, position.isDetected);
+		
+		// Set indicator to active when hand is detected and moving
+		const velocity = handTracker.getVelocity();
+		const isActive = position.isDetected && (Math.abs(velocity.x) > 2 || Math.abs(velocity.y) > 2);
+		handIndicator.setActive(isActive);
+	});
+
+	// Start hand tracking
+	try {
+		await handTracker.start();
+		console.log('Hand tracking initialized successfully');
+	} catch (error) {
+		console.error('Failed to initialize hand tracking:', error);
+	}
+
 	console.log("simulator initialization done")
 
 	const camera = new Camera(canvasElement);
@@ -232,9 +258,31 @@ async function main() {
 		const commandEncoder = device.createCommandEncoder()
 
 		// 計算のためのパス
-		mlsmpmSimulator.execute(commandEncoder, 
-				[camera.currentHoverX / canvas.clientWidth, camera.currentHoverY / canvas.clientHeight], 
-				camera.calcMouseVelocity(), mlsmpmNumParticleParams[paramsIdx], mouseRadiuses[paramsIdx])
+		// Use hand position if detected, otherwise fall back to mouse
+		let interactionCoord: number[];
+		let interactionVelocity: number[];
+		
+		if (currentHandPosition.isDetected) {
+			// Convert hand screen coordinates to normalized coordinates
+			interactionCoord = [
+				currentHandPosition.x / canvas.clientWidth,
+				currentHandPosition.y / canvas.clientHeight
+			];
+			
+			// Calculate hand velocity
+			const handVel = handTracker.getVelocity();
+			interactionVelocity = [handVel.x / canvas.clientWidth, handVel.y / canvas.clientHeight, 0, 0];
+		} else {
+			// Fall back to mouse interaction
+			interactionCoord = [
+				camera.currentHoverX / canvas.clientWidth, 
+				camera.currentHoverY / canvas.clientHeight
+			];
+			interactionVelocity = camera.calcMouseVelocity();
+		}
+		
+		mlsmpmSimulator.execute(commandEncoder, interactionCoord, interactionVelocity, 
+			mlsmpmNumParticleParams[paramsIdx], mouseRadiuses[paramsIdx])
 		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 
 		device.queue.submit([commandEncoder.finish()])
