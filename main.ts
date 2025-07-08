@@ -263,25 +263,32 @@ async function main() {
 		let interactionVelocity: number[];
 		
 		if (currentHandPosition.isDetected) {
-			// Convert hand screen coordinates to normalized coordinates
+			// Convert hand screen coordinates to canvas-relative coordinates
+			const canvasRect = canvas.getBoundingClientRect();
+			const canvasX = currentHandPosition.x - canvasRect.left;
+			const canvasY = currentHandPosition.y - canvasRect.top;
+			
+			// Normalize to canvas dimensions (0-1 range)
 			interactionCoord = [
-				currentHandPosition.x / canvas.clientWidth,
-				currentHandPosition.y / canvas.clientHeight
+				canvasX / canvas.clientWidth,
+				canvasY / canvas.clientHeight
 			];
 			
 			// Calculate hand velocity
 			const handVel = handTracker.getVelocity();
-			// Scale velocity similar to how camera calculates mouse velocity
-			const scaledVelX = (handVel.x / canvas.width) * (canvas.width / canvas.height);
-			const scaledVelY = -(handVel.y / canvas.height);
 			
-			// Apply the same transformation as camera.calcMouseVelocity()
-			let mouseViewVelocity = [scaledVelX, scaledVelY, 0, 0];
-			interactionVelocity = mouseViewVelocity;
+			// Convert velocity to view space similar to camera.calcMouseVelocity()
+			// Scale velocity to match the expected range
+			const velX = (handVel.x / canvas.clientWidth) * (canvas.clientWidth / canvas.clientHeight);
+			const velY = -(handVel.y / canvas.clientHeight);
+			
+			interactionVelocity = [velX, velY, 0, 0];
 			
 			// Debug logging
 			if (Math.abs(handVel.x) > 2 || Math.abs(handVel.y) > 2) {
 				console.log('Hand interaction:', {
+					screenPos: [currentHandPosition.x, currentHandPosition.y],
+					canvasPos: [canvasX, canvasY],
 					coord: interactionCoord,
 					velocity: interactionVelocity,
 					rawVel: handVel

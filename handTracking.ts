@@ -53,19 +53,15 @@ export class HandTracker {
 
     private onResults(results: Results) {
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
-            // Get the canvas element to use its dimensions
-            const canvas = document.getElementById('fluidCanvas') as HTMLCanvasElement;
-            const canvasRect = canvas.getBoundingClientRect();
-            
             const landmarks = results.multiHandLandmarks[0];
             
             // Index finger tip is landmark 8
             const indexFingerTip = landmarks[8];
             
-            // Convert normalized coordinates to screen coordinates
-            // Note: MediaPipe coordinates are normalized (0-1) and mirrored
-            const handScreenX = (1 - indexFingerTip.x) * canvasRect.width + canvasRect.left;
-            const handScreenY = indexFingerTip.y * canvasRect.height + canvasRect.top;
+            // Convert normalized coordinates to window coordinates
+            // MediaPipe coordinates are normalized (0-1) and horizontally mirrored
+            const handScreenX = (1 - indexFingerTip.x) * window.innerWidth;
+            const handScreenY = indexFingerTip.y * window.innerHeight;
 
             this.previousPosition = { ...this.currentPosition };
             this.currentPosition = {
