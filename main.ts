@@ -265,13 +265,16 @@ async function main() {
 		if (currentHandPosition.isDetected) {
 			// Convert hand screen coordinates to normalized coordinates
 			interactionCoord = [
-				currentHandPosition.x / canvas.clientWidth,
-				currentHandPosition.y / canvas.clientHeight
+				currentHandPosition.x / window.innerWidth,
+				currentHandPosition.y / window.innerHeight
 			];
 			
 			// Calculate hand velocity
 			const handVel = handTracker.getVelocity();
-			interactionVelocity = [handVel.x / canvas.clientWidth, handVel.y / canvas.clientHeight, 0, 0];
+			// Scale velocity similar to how camera calculates mouse velocity
+			const scaledVelX = (handVel.x / window.innerWidth) * (window.innerWidth / window.innerHeight);
+			const scaledVelY = -(handVel.y / window.innerHeight);
+			interactionVelocity = [scaledVelX, scaledVelY, 0, 0];
 		} else {
 			// Fall back to mouse interaction
 			interactionCoord = [
