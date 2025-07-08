@@ -71,6 +71,14 @@
       * {
         user-select: none; 
       }
+      
+      /* Style the voice widget to position it nicely */
+      elevenlabs-convai {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 1001;
+      }
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   </head>
@@ -112,6 +120,11 @@
         <i class="fab fa-github"></i>
     </a>
     <canvas id="fluidCanvas"></canvas>
+    
+    <!-- ElevenLabs Voice AI Widget -->
+    <elevenlabs-convai agent-id="agent_01jw3bjvvvekdtn78n3tpq1ndg"></elevenlabs-convai>
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+    
     <script type="module" src="main.ts"></script>
   </body>
 </html>
