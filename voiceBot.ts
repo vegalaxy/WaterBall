@@ -1,4 +1,4 @@
-import { ElevenLabsConversationClient } from '@11labs/client';
+import ElevenLabs from '@11labs/client';
 
 export class VoiceBot {
     private conversation: any = null;
@@ -14,7 +14,7 @@ export class VoiceBot {
         try {
             this.updateStatus('Initializing voice bot...');
             
-            this.conversation = new ElevenLabsConversationClient({
+            this.conversation = new ElevenLabs.Conversation({
                 agentId: 'agent_01jw3bjvvvekdtn78n3tpq1ndg',
                 apiKey: 'sk_b7780b8dcd96f7f079a2baf650a6e1ea5120732840daaa22',
                 onConnect: () => {
