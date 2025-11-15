@@ -97,9 +97,9 @@ fn fs_main(input: VertexOutput) -> @location(0) vec4f {
     let reflection = textureSample(cubemapTexture, cubemapSampler, reflectDir).rgb;
 
     let fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 3.0);
-    let oceanColor = vec3f(0.0, 0.15, 0.3);
+    let oceanColor = vec3f(0.0, 0.3, 0.6);
 
-    let finalColor = mix(oceanColor * diffuse, reflection, fresnel * 0.8 + 0.2);
+    let finalColor = mix(oceanColor * diffuse, reflection, fresnel * 0.6 + 0.2);
 
-    return vec4f(finalColor, 0.85);
+    return vec4f(finalColor, 1.0);
 }
