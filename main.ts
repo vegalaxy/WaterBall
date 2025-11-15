@@ -148,8 +148,8 @@ async function main() {
 
 
 	let mlsmpmNumParticleParams = [30000, 60000, 100000]
-	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [72, 72, 72]]
-	let mlsmpmInitDistances = [60, 70, 90]
+	let mlsmpmInitBoxSizes = [[120, 40, 40], [140, 45, 45], [160, 50, 50]]
+	let mlsmpmInitDistances = [80, 100, 120]
 	let radiuses = [15, 20, 25]
 	let mouseRadiuses = [5, 6, 8]
 	let stretchStrength = [2.5, 2.0, 1.5]
@@ -212,7 +212,6 @@ async function main() {
 
 	let paramsIdx = 1
 	let initBoxSize = mlsmpmInitBoxSizes[paramsIdx]
-	let realBoxSize = [...initBoxSize];
 
 	smallValue.textContent = "30,000"
 	mediumValue.textContent = "60,000"
@@ -221,21 +220,17 @@ async function main() {
 	let sphereRenderFl = false
 	let rotateFl = false
 	let startFl = true
-	let boxWidthRatio = 1.
 
 	console.log("simulation start")
 	async function frame() {
 		const start = performance.now();
 
-		if (numberButtonPressed || startFl) { 
+		if (numberButtonPressed || startFl) {
 			paramsIdx = parseInt(numberButtonPressedButton)
 			initBoxSize = mlsmpmInitBoxSizes[paramsIdx]
 			mlsmpmSimulator.reset(initBoxSize, radiuses[paramsIdx])
-			camera.reset(mlsmpmInitDistances[paramsIdx], [initBoxSize[0] / 2, initBoxSize[1] / 2, initBoxSize[2] / 2], 
+			camera.reset(mlsmpmInitDistances[paramsIdx], [initBoxSize[0] / 2, initBoxSize[1] / 2, initBoxSize[2] / 2],
 				mlsmpmFov, mlsmpmZoomRate)
-			realBoxSize = [...initBoxSize]
-			let slider = document.getElementById("slider") as HTMLInputElement
-			slider.value = "100"
 			numberButtonPressed = false
 			startFl = false
 		}
@@ -246,16 +241,6 @@ async function main() {
 		const rotate = document.getElementById("autorotate") as HTMLInputElement
 		sphereRenderFl = particle.checked
 		rotateFl = rotate.checked
-		let curBoxWidthRatio = parseInt(slider.value) / 200 + 0.5
-		const minClosingSpeed = -0.01
-		const maxOpeningSpeed = 0.04
-		let dVal = Math.max(curBoxWidthRatio - boxWidthRatio, minClosingSpeed)
-		dVal = Math.min(dVal, maxOpeningSpeed);
-		boxWidthRatio += dVal
-
-		// 行列の更新
-		realBoxSize[2] = initBoxSize[2] * boxWidthRatio
-		mlsmpmSimulator.changeBoxSize(realBoxSize)
 		device.queue.writeBuffer(renderUniformBuffer, 0, renderUniformsValues) 
 
 		const commandEncoder = device.createCommandEncoder()
