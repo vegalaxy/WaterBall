@@ -106,6 +106,9 @@ export class HandTracker {
                     console.warn('Camera initialization failed. Hand tracking will be disabled. You can still interact using your mouse.');
                 }
             }
+
+            // Don't throw - allow the app to continue without hand tracking
+            throw error;
         }
     }
 

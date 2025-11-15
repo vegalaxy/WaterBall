@@ -66,9 +66,10 @@ export class Camera {
         this.isDragging = false
         this.prevX = 0
         this.prevY = 0
-        this.currentXtheta = -Math.PI / 2 * 0.85
-        this.currentYtheta = -Math.PI / 16
-        this.maxYTheta = Math.PI / 8
+        this.currentXtheta = -Math.PI / 2 * 1
+        // this.currentYtheta = -Math.PI / 12
+        this.currentYtheta = 0
+        this.maxYTheta = 0
         this.minYTheta = -0.99 * Math.PI / 2.
         this.sensitivity = 0.005
         this.currentDistance = initDistance

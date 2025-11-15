@@ -73,77 +73,35 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
 
         particles[id.x].C = B * 4.0f;
         particles[id.x].position += particles[id.x].v * dt;
-
-        let tube_radius: f32 = 15.0;
-        let center_y: f32 = real_box_size.y / 2.0;
-        let center_z: f32 = real_box_size.z / 2.0;
-        let wave_center_x: f32 = real_box_size.x * 0.5;
-        let pos = particles[id.x].position;
-
-        let radial_dist = sqrt((pos.y - center_y) * (pos.y - center_y) + (pos.z - center_z) * (pos.z - center_z));
-
-        let flow_force: f32 = 3.5;
-        particles[id.x].v.x += flow_force * dt;
-
-        let wave_start: f32 = wave_center_x - 20.0;
-        let wave_peak: f32 = wave_center_x;
-        let wave_end: f32 = wave_center_x + 15.0;
-
-        if (pos.x >= wave_start && pos.x <= wave_peak) {
-            let wave_progress = (pos.x - wave_start) / (wave_peak - wave_start);
-            let lift_force = 10.0 * wave_progress;
-            particles[id.x].v.y += lift_force * dt;
-        }
-
-        if (pos.x >= wave_peak && pos.x <= wave_end) {
-            let curl_progress = (pos.x - wave_peak) / (wave_end - wave_peak);
-            let wave_height = center_y + 10.0;
-
-            if (pos.y > wave_height) {
-                let curl_force = 4.0;
-                particles[id.x].v.x -= curl_force * curl_progress * dt;
-                particles[id.x].v.y -= curl_force * 1.8 * dt;
-
-                let barrel_radius = 9.0;
-                let angle = atan2(pos.z - center_z, pos.y - center_y);
-                let target_angle = angle + 3.14159 * 0.25;
-                let target_y = center_y + barrel_radius * cos(target_angle);
-                let target_z = center_z + barrel_radius * sin(target_angle);
-
-                particles[id.x].v.y += (target_y - pos.y) * 0.4 * dt;
-                particles[id.x].v.z += (target_z - pos.z) * 0.4 * dt;
-            }
-        }
-
-        if (radial_dist > tube_radius) {
-            let radial_dir_y = (center_y - pos.y) / radial_dist;
-            let radial_dir_z = (center_z - pos.z) / radial_dist;
-            let confinement_force = 6.0;
-            particles[id.x].v.y += radial_dir_y * confinement_force * dt;
-            particles[id.x].v.z += radial_dir_z * confinement_force * dt;
-        }
-
-        if (pos.x > real_box_size.x - 8.0) {
-            particles[id.x].position.x = 10.0 + fract(sin(f32(id.x) * 12.9898) * 43758.5453) * 2.0;
-            let spawn_radius = tube_radius * 0.6;
-            let spawn_angle = fract(sin(f32(id.x) * 78.233) * 43758.5453) * 6.28318;
-            particles[id.x].position.y = center_y + spawn_radius * cos(spawn_angle);
-            particles[id.x].position.z = center_z + spawn_radius * sin(spawn_angle);
-            particles[id.x].v = vec3f(12.0, 0.0, 0.0);
-            particles[id.x].C = mat3x3f(vec3f(0.), vec3f(0.), vec3f(0.));
-        }
-
         particles[id.x].position = vec3f(
-            clamp(particles[id.x].position.x, 1., real_box_size.x - 2.),
-            clamp(particles[id.x].position.y, 1., real_box_size.y - 2.),
+            clamp(particles[id.x].position.x, 1., real_box_size.x - 2.), 
+            clamp(particles[id.x].position.y, 1., real_box_size.y - 2.), 
             clamp(particles[id.x].position.z, 1., real_box_size.z - 2.)
         );
 
+        let center = vec3f(real_box_size.x / 2, real_box_size.y / 2, real_box_size.z / 2);
+        let dist = center - particles[id.x].position;
+        let dirToOrigin = normalize(dist);
+        var rForce = vec3f(0);
+
+        // let r: f32 = 18.; // 40,000
+        let r: f32 = sphereRadius; // 60,000
+        // let r: f32 = 26.; // 100,000
+
+        if (dot(dist, dist) < r * r) {
+            particles[id.x].v += -(r - sqrt(dot(dist, dist))) * dirToOrigin * 3.0;
+        }
+
+        particles[id.x].v += dirToOrigin * 0.1;
+
+        
         let k = 3.0;
         let wall_stiffness = 1.0;
         let x_n: vec3f = particles[id.x].position + particles[id.x].v * dt * k;
         let wall_min: vec3f = vec3f(3.);
         let wall_max: vec3f = real_box_size - 4.;
+        if (x_n.x < wall_min.x) { particles[id.x].v.x += wall_stiffness * (wall_min.x - x_n.x); }
+        if (x_n.x > wall_max.x) { particles[id.x].v.x += wall_stiffness * (wall_max.x - x_n.x); }
         if (x_n.y < wall_min.y) { particles[id.x].v.y += wall_stiffness * (wall_min.y - x_n.y); }
         if (x_n.y > wall_max.y) { particles[id.x].v.y += wall_stiffness * (wall_max.y - x_n.y); }
         if (x_n.z < wall_min.z) { particles[id.x].v.z += wall_stiffness * (wall_min.z - x_n.z); }
