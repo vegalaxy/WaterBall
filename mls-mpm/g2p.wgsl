@@ -81,29 +81,29 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
 
         let center = vec3f(real_box_size.x / 2, real_box_size.y / 2, real_box_size.z / 2);
         let pos = particles[id.x].position;
+        let dist = center - pos;
+        let dist_length = length(dist);
+        let dirToOrigin = normalize(dist);
 
-        let major_radius: f32 = sphereRadius * 0.7;
-        let minor_radius: f32 = sphereRadius * 0.35;
+        let r: f32 = sphereRadius;
 
-        let offset_from_center = pos - center;
-        let dist_in_xz = sqrt(offset_from_center.x * offset_from_center.x + offset_from_center.z * offset_from_center.z);
-
-        let point_on_ring = vec3f(
-            center.x + (offset_from_center.x / dist_in_xz) * major_radius,
-            center.y,
-            center.z + (offset_from_center.z / dist_in_xz) * major_radius
-        );
-
-        let dist_to_ring = pos - point_on_ring;
-        let dist_to_ring_length = length(dist_to_ring);
-
-        if (dist_to_ring_length < minor_radius && dist_in_xz > 0.1) {
-            let dir_from_ring = normalize(dist_to_ring);
-            particles[id.x].v += -(minor_radius - dist_to_ring_length) * dir_from_ring * 1.2;
+        if (dist_length < r) {
+            particles[id.x].v += -(r - dist_length) * dirToOrigin * 3.0;
         }
 
+        let offset_from_center = pos - center;
         let tangent_dir = normalize(vec3f(-offset_from_center.z, 0.0, offset_from_center.x));
-        particles[id.x].v += tangent_dir * 0.06;
+
+        let dist_from_center = length(offset_from_center);
+        let tube_radius = r * 1.3;
+        let tube_width = r * 0.35;
+
+        let radial_dist_to_tube = abs(dist_from_center - tube_radius);
+
+        if (radial_dist_to_tube < tube_width) {
+            let flow_strength = (1.0 - radial_dist_to_tube / tube_width) * 0.25;
+            particles[id.x].v += tangent_dir * flow_strength;
+        }
 
         
         let k = 3.0;
