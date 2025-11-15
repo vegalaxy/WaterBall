@@ -231,10 +231,12 @@ async function main() {
 	let rotateFl = true
 	let startFl = true
 	let boxWidthRatio = 1.
+	let lastFrameTime = performance.now()
 
 	console.log("simulation start")
 	async function frame() {
 		const start = performance.now();
+		const deltaTime = start - lastFrameTime;
 
 		if (numberButtonPressed || startFl) { 
 			paramsIdx = parseInt(numberButtonPressedButton)
@@ -305,7 +307,7 @@ async function main() {
 		mlsmpmSimulator.execute(commandEncoder, interactionCoord, interactionVelocity,
 			mlsmpmNumParticleParams[paramsIdx], mouseRadiuses[paramsIdx])
 
-		oceanRenderer.execute(context, commandEncoder, sceneDepthTextureView, end - start)
+		oceanRenderer.execute(context, commandEncoder, sceneDepthTextureView, deltaTime)
 		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 
 		device.queue.submit([commandEncoder.finish()])
@@ -317,9 +319,10 @@ async function main() {
 		// }
 
 		const end = performance.now();
+		lastFrameTime = start;
 
 		requestAnimationFrame(frame)
-	} 
+	}
 	requestAnimationFrame(frame)
 }
 
