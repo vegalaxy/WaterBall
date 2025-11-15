@@ -212,6 +212,8 @@ async function main() {
 
 	let paramsIdx = 1
 	let initBoxSize = mlsmpmInitBoxSizes[paramsIdx]
+	console.log("Init box size:", initBoxSize)
+	console.log("Init distance:", mlsmpmInitDistances[paramsIdx])
 
 	smallValue.textContent = "30,000"
 	mediumValue.textContent = "60,000"
