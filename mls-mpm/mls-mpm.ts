@@ -11,7 +11,7 @@ import { numParticlesMax, renderUniformsViews } from '../common'
 export const mlsmpmParticleStructSize = 80
 
 export class MLSMPMSimulator {
-    max_x_grids = 80;
+    max_x_grids = 180;
     max_y_grids = 80;
     max_z_grids = 80;
     cellStructSize = 16;
