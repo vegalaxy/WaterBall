@@ -72,7 +72,7 @@ export class OceanRenderer {
             ]
         })
 
-        const meshData = this.createOceanMesh(120, 120, 80)
+        const meshData = this.createOceanMesh(300, 300, 100)
 
         this.vertexBuffer = device.createBuffer({
             label: 'ocean vertex buffer',
@@ -99,7 +99,7 @@ export class OceanRenderer {
         const stepZ = depth / resolution
         const offsetX = -width / 2
         const offsetZ = -depth / 2
-        const yPos = -5
+        const yPos = -30
 
         for (let z = 0; z <= resolution; z++) {
             for (let x = 0; x <= resolution; x++) {
