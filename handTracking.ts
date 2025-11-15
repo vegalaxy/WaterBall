@@ -95,6 +95,20 @@ export class HandTracker {
             console.log('Hand tracking started successfully');
         } catch (error) {
             console.error('Failed to start hand tracking:', error);
+
+            // Provide user-friendly error message based on error type
+            if (error instanceof Error) {
+                if (error.name === 'NotAllowedError') {
+                    console.warn('Camera permission denied. Hand tracking will be disabled. You can still interact using your mouse.');
+                } else if (error.name === 'NotFoundError') {
+                    console.warn('No camera found. Hand tracking will be disabled. You can still interact using your mouse.');
+                } else {
+                    console.warn('Camera initialization failed. Hand tracking will be disabled. You can still interact using your mouse.');
+                }
+            }
+
+            // Don't throw - allow the app to continue without hand tracking
+            throw error;
         }
     }
 

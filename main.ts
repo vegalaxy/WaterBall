@@ -188,11 +188,14 @@ async function main() {
 	});
 
 	// Start hand tracking
+	let handTrackingEnabled = false;
 	try {
 		await handTracker.start();
 		console.log('Hand tracking initialized successfully');
+		handTrackingEnabled = true;
 	} catch (error) {
-		console.error('Failed to initialize hand tracking:', error);
+		console.warn('Hand tracking not available, continuing with mouse-only interaction');
+		handTrackingEnabled = false;
 	}
 
 	console.log("simulator initialization done")
