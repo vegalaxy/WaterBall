@@ -80,10 +80,24 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
         );
 
         let center = vec3f(real_box_size.x / 2, real_box_size.y / 2, real_box_size.z / 2);
-        let dist = center - particles[id.x].position;
-        let dirToOrigin = normalize(dist);
-        var rForce = vec3f(0);
+        let pos = particles[id.x].position;
+        let offset = pos - center;
 
+        // Create a cylindrical hole along Y axis
+        let radial_dist_xz = sqrt(offset.x * offset.x + offset.z * offset.z);
+        let hole_radius = sphereRadius * 0.3;
+        let tube_thickness = sphereRadius * 0.25;
+
+        // Push particles away from the hole center
+        if (radial_dist_xz < hole_radius + tube_thickness) {
+            let radial_dir_xz = normalize(vec3f(offset.x, 0.0, offset.z));
+            let push_strength = (hole_radius + tube_thickness - radial_dist_xz) * 2.5;
+            particles[id.x].v += radial_dir_xz * push_strength;
+        }
+
+        // Original sphere collision
+        let dist = center - pos;
+        let dirToOrigin = normalize(dist);
         let r: f32 = sphereRadius;
 
         if (dot(dist, dist) < r * r) {
