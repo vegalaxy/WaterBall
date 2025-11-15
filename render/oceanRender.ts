@@ -144,13 +144,13 @@ export class OceanRenderer {
             colorAttachments: [{
                 view: context.getCurrentTexture().createView(),
                 clearValue: { r: 0.1, g: 0.2, b: 0.3, a: 1.0 },
-                loadOp: 'clear',
+                loadOp: 'load',
                 storeOp: 'store'
             }],
             depthStencilAttachment: {
                 view: depthTextureView,
                 depthClearValue: 1.0,
-                depthLoadOp: 'clear',
+                depthLoadOp: 'load',
                 depthStoreOp: 'store'
             }
         })

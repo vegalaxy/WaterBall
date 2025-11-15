@@ -307,8 +307,8 @@ async function main() {
 		mlsmpmSimulator.execute(commandEncoder, interactionCoord, interactionVelocity,
 			mlsmpmNumParticleParams[paramsIdx], mouseRadiuses[paramsIdx])
 
-		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 		oceanRenderer.execute(context, commandEncoder, sceneDepthTextureView, deltaTime)
+		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 
 		device.queue.submit([commandEncoder.finish()])
 
