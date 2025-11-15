@@ -4,6 +4,7 @@ import { Camera } from './camera'
 import { mlsmpmParticleStructSize, MLSMPMSimulator } from './mls-mpm/mls-mpm'
 import { renderUniformsViews, renderUniformsValues, numParticlesMax } from './common'
 import { FluidRenderer } from './render/fluidRender'
+import { OceanRenderer } from './render/oceanRender'
 import { HandTracker, HandPosition } from './handTracking'
 import { HandIndicator } from './handIndicator'
 
@@ -149,7 +150,7 @@ async function main() {
 
 	let mlsmpmNumParticleParams = [30000, 60000, 100000]
 	let mlsmpmInitBoxSizes = [[52, 52, 52], [60, 60, 60], [72, 72, 72]]
-	let mlsmpmInitDistances = [60, 70, 90]
+	let mlsmpmInitDistances = [100, 110, 130]
 	let radiuses = [15, 20, 25]
 	let mouseRadiuses = [5, 6, 8]
 	let stretchStrength = [2.5, 2.0, 1.5]
@@ -161,15 +162,23 @@ async function main() {
 	const mlsmpmDiameter = 2 * mlsmpmRadius
 	const mlsmpmZoomRate = 0.7
 	const depthMapTexture = device.createTexture({
-		label: 'depth map texture', 
+		label: 'depth map texture',
 		size: [canvas.width, canvas.height, 1],
 		usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
 		format: 'r32float',
 	});
 	const depthMapTextureView = depthMapTexture.createView()
+	const sceneDepthTexture = device.createTexture({
+		label: 'scene depth texture',
+		size: [canvas.width, canvas.height, 1],
+		usage: GPUTextureUsage.RENDER_ATTACHMENT,
+		format: 'depth32float',
+	});
+	const sceneDepthTextureView = sceneDepthTexture.createView()
 	const mlsmpmSimulator = new MLSMPMSimulator(particleBuffer, posvelBuffer, mlsmpmDiameter, device, renderUniformBuffer, depthMapTextureView, canvas)
-	const mlsmpmRenderer = new FluidRenderer(device, canvas, presentationFormat, mlsmpmRadius, mlsmpmFov, posvelBuffer, renderUniformBuffer, 
+	const mlsmpmRenderer = new FluidRenderer(device, canvas, presentationFormat, mlsmpmRadius, mlsmpmFov, posvelBuffer, renderUniformBuffer,
 		cubemapTextureView, depthMapTextureView, mlsmpmSimulator.restDensity)
+	const oceanRenderer = new OceanRenderer(device, presentationFormat, renderUniformBuffer, cubemapTextureView)
 
 	// Hand tracking setup
 	const handIndicator = new HandIndicator();
@@ -293,8 +302,10 @@ async function main() {
 			interactionVelocity = camera.calcMouseVelocity();
 		}
 		
-		mlsmpmSimulator.execute(commandEncoder, interactionCoord, interactionVelocity, 
+		mlsmpmSimulator.execute(commandEncoder, interactionCoord, interactionVelocity,
 			mlsmpmNumParticleParams[paramsIdx], mouseRadiuses[paramsIdx])
+
+		oceanRenderer.execute(context, commandEncoder, sceneDepthTextureView, end - start)
 		mlsmpmRenderer.execute(context, commandEncoder, mlsmpmSimulator.numParticles, sphereRenderFl, stretchStrength[paramsIdx])
 
 		device.queue.submit([commandEncoder.finish()])
