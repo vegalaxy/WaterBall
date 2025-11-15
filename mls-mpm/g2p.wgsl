@@ -82,8 +82,8 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
         let center = vec3f(real_box_size.x / 2, real_box_size.y / 2, real_box_size.z / 2);
         let pos = particles[id.x].position;
 
-        let major_radius: f32 = sphereRadius * 1.2;
-        let minor_radius: f32 = sphereRadius * 0.4;
+        let major_radius: f32 = sphereRadius * 0.7;
+        let minor_radius: f32 = sphereRadius * 0.35;
 
         let offset_from_center = pos - center;
         let dist_in_xz = sqrt(offset_from_center.x * offset_from_center.x + offset_from_center.z * offset_from_center.z);
@@ -99,11 +99,11 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
 
         if (dist_to_ring_length < minor_radius && dist_in_xz > 0.1) {
             let dir_from_ring = normalize(dist_to_ring);
-            particles[id.x].v += -(minor_radius - dist_to_ring_length) * dir_from_ring * 3.0;
+            particles[id.x].v += -(minor_radius - dist_to_ring_length) * dir_from_ring * 1.2;
         }
 
         let tangent_dir = normalize(vec3f(-offset_from_center.z, 0.0, offset_from_center.x));
-        particles[id.x].v += tangent_dir * 0.15;
+        particles[id.x].v += tangent_dir * 0.06;
 
         
         let k = 3.0;
