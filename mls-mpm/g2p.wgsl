@@ -95,6 +95,14 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
             particles[id.x].v += radial_dir_yz * push_strength;
         }
 
+        // Add circular flow around the tube
+        let tangent_dir = normalize(vec3f(0.0, -offset.z, offset.y));
+        let flow_zone = sphereRadius * 0.8;
+        if (radial_dist_yz < flow_zone) {
+            let flow_strength = (1.0 - radial_dist_yz / flow_zone) * 0.3;
+            particles[id.x].v += tangent_dir * flow_strength;
+        }
+
         // Original sphere collision
         let dist = center - pos;
         let dirToOrigin = normalize(dist);

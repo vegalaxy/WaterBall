@@ -219,7 +219,7 @@ async function main() {
 	largeValue.textContent = "100,000"
 
 	let sphereRenderFl = false
-	let rotateFl = false
+	let rotateFl = true
 	let startFl = true
 	let boxWidthRatio = 1.
 
@@ -300,9 +300,10 @@ async function main() {
 		device.queue.submit([commandEncoder.finish()])
 
 		camera.setNewPrevMouseCoord();
-		if (rotateFl) {
-			camera.stepAngle();
-		}
+		// Auto-rotation disabled
+		// if (rotateFl) {
+		// 	camera.stepAngle();
+		// }
 
 		const end = performance.now();
 
