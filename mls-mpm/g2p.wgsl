@@ -80,30 +80,17 @@ fn g2p(@builtin(global_invocation_id) id: vec3<u32>) {
         );
 
         let center = vec3f(real_box_size.x / 2, real_box_size.y / 2, real_box_size.z / 2);
-        let pos = particles[id.x].position;
-        let dist = center - pos;
-        let dist_length = length(dist);
+        let dist = center - particles[id.x].position;
         let dirToOrigin = normalize(dist);
+        var rForce = vec3f(0);
 
         let r: f32 = sphereRadius;
 
-        if (dist_length < r) {
-            particles[id.x].v += -(r - dist_length) * dirToOrigin * 3.0;
+        if (dot(dist, dist) < r * r) {
+            particles[id.x].v += -(r - sqrt(dot(dist, dist))) * dirToOrigin * 3.0;
         }
 
-        let offset_from_center = pos - center;
-        let tangent_dir = normalize(vec3f(-offset_from_center.z, 0.0, offset_from_center.x));
-
-        let dist_from_center = length(offset_from_center);
-        let tube_radius = r * 1.3;
-        let tube_width = r * 0.35;
-
-        let radial_dist_to_tube = abs(dist_from_center - tube_radius);
-
-        if (radial_dist_to_tube < tube_width) {
-            let flow_strength = (1.0 - radial_dist_to_tube / tube_width) * 0.25;
-            particles[id.x].v += tangent_dir * flow_strength;
-        }
+        particles[id.x].v += dirToOrigin * 0.1;
 
         
         let k = 3.0;
